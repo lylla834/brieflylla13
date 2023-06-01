@@ -1,0 +1,158 @@
+BRIEF 13
+
+
+CREATION GROUPE DE RESSOURCE
+
+az group create --name lyllabrief130 --location francecentral
+
+CREATION VM
+
+az vm create \
+  --resource-group lyllabrief130 \
+  --name vmlyllascript \
+  --image UbuntuLTS \
+  --admin-username lylla \
+  --generate-ssh-keys \
+  --public-ip-sku Standard
+
+Vérification de la version de Ubuntu avec la commande : lbs_release –a
+  
+  OUVERTURE DU PORT 80
+  az vm open-port --port 80 --resource-group lyllabrief130 --name vmlyllascript
+  
+  CONNECTION SSH
+  
+  ssh lylla@20.111.52.77
+  ADRESSE IP :20.111.52.77
+  
+INSTALLATION DOCKER :
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-fr
+
+ou plus rapide : 
+
+curl -fsSL https://get.docker.com/ -o lylla-docker.sh
+sh lylla-docker.sh
+
+lors de l'installation docker :
+sudo usermod -aG docker lylla
+
+Pour appliquer la nouvelle appartenance au groupe, déconnectez-vous du serveur et reconnectez-vous, ou tapez ce qui suit :
+su - lylla
+
+
+
+nginx-image/Dockerfile
+
+FROM nginx:latest
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
+
+docker build -t nginxlylla . (Nom personnalise repo)
+docker run -d -p 80:80 id IMAGES
+docker ps -a
+docker images
+docker stop
+docker rm id container
+docker rmi id image
+
+
+
+VIM INDEX :
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+        <head>
+                <meta charset="utf-8">
+                <titleref="style.css">
+                <script src="script.js"></script>
+        </head>
+        <body>
+                <h1>Bonjour  Nginx</h1>
+                <p>Bienvenue sur ma page index.html de Lylla!</p>
+        </body>
+</html>
+
+
+A partir de l'image  creer sur dockerhub :
+sur azure faire cmd :docker pull lyllabani/lylla-nginx-image:latest
+
+
+envoyer l'image sur docker :
+docker images (pour avoir id img)
+docker tag 9508dee63df7 lyllabani/nginx:latest (il faut tagger avant de pusher sur docker)
+docker login pour se connecter à docker
+docker push lyllabani/nginx:latest
+sudo docker pull lyllabani/nginx:latest
+apt-get remove --purge docker*.
+
+CREATION SCRIPT :
+installation docker
+curl -fsSL https://get.docker.com/ -o lylla-docker.sh
+sh lylla-docker.sh
+
+#!/bin/bash
+
+#Installing Docker
+sudo apt update&&sudo apt upgrade -y
+curl -fsSL https://get.docker.com/ -o install-docker.sh
+sh install-docker.sh --dry-run
+sudo sh install-docker.sh
+
+
+#Creating container
+
+docker run --name nginxlylla -p 80:80 -d  lyllabani/nginx
+
+
+pour lancer le script : bash init-script.sh
+
+TEST SCRIPT OK!
+
+TERRAFORM :
+
+pour supprimer un repertoire : rm -r azure-webserver/
+
+git clone https://github.com/lylla834/azure-webserver.git
+pour recuperer les repertoires azure-webserver
+terraform version
+terraform init
+terraform plan
+terraform apply -auto-approve
+terraform destroy
+#to update the infra
+terraform apply -refresh-only -auto-approve
+
+
+CREATION MODULE PARENTS :
+
+OUTPUTS :
+
+
+
+output "resource_group_name" {
+ value = module.ProdEnvironment.resource_group_name
+}
+
+output "public_ip_address" {
+   value = module.ProdEnvironment.The_webserver_Public_ip
+}
+
+output "environment" {
+   value = module.ProdEnvironment.environment 
+}
+
+
+
+
+output "resource_group_name" {
+ value = module.stagingEnvironment.resource_group_name
+}
+
+output "public_ip_address" {
+   value = module.stagingEnvironment.The_webserver_Public_ip
+}
+
+output "environment" {
+   value = module.stagingEnvironment.environment 
+}
